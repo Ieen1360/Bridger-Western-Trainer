@@ -41,6 +41,36 @@ body{
     font-weight:bold;
 }
 
+/* Modos */
+#modeBox{
+    position:absolute;
+    top:15px;
+    right:15px;
+    display:flex;
+    gap:10px;
+}
+
+.modeBtn{
+    padding:10px 16px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:bold;
+    background:#2a2a2a;
+    color:white;
+    transition:0.2s;
+}
+
+.modeBtn:hover{
+    transform:scale(1.05);
+}
+
+.activeMode{
+    background:#ffffff;
+    color:black;
+}
+
 #game{
     text-align:center;
 }
@@ -63,6 +93,29 @@ h1{
     font-weight:bold;
     transition:0.15s;
     margin:auto;
+}
+
+/* Barra */
+#progressContainer{
+    width:320px;
+    height:28px;
+    background:#222;
+    border-radius:30px;
+    overflow:hidden;
+    margin:25px auto 0;
+    border:2px solid white;
+}
+
+#progressBar{
+    width:0%;
+    height:100%;
+    background:#1aff75;
+    transition:0.2s;
+}
+
+#progressText{
+    margin-top:10px;
+    font-size:22px;
 }
 
 .correct{
@@ -113,10 +166,37 @@ h1{
     <button class="langBtn" onclick="setLanguage('en')">EN</button>
 </div>
 
+<!-- Modos -->
+<div id="modeBox">
+    <button class="modeBtn activeMode"
+        onclick="setMode('arrow',35,this)">
+        Arrow Shard
+    </button>
+
+    <button class="modeBtn"
+        onclick="setMode('leg',21,this)">
+        Rust Mares Leg
+    </button>
+
+    <button class="modeBtn"
+        onclick="setMode('chest',10,this)">
+        Chest
+    </button>
+</div>
+
 <div id="game">
     <h1 id="title">BRIDGER WESTERN TRAINER</h1>
 
     <div id="circle">R</div>
+
+    <!-- Barra -->
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+    </div>
+
+    <div id="progressText">
+        0 / 35
+    </div>
 
     <div id="info">
         <span id="errorsLabel">Erros</span>: <span id="errors">0</span>/2 <br>
@@ -136,6 +216,9 @@ const streakText = document.getElementById("streak");
 const resetsText = document.getElementById("resets");
 const restartBtn = document.getElementById("restart");
 
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+
 let currentKey = "";
 let errors = 0;
 let streak = 0;
@@ -144,6 +227,11 @@ let canReset = false;
 
 let playing = true;
 let timer;
+
+/* Progressão */
+let progress = 0;
+let maxProgress = 35;
+let currentMode = "arrow";
 
 /* Traduções */
 const translations = {
@@ -190,6 +278,31 @@ function setLanguage(lang){
         translations[lang].restart;
 }
 
+function setMode(mode, max, button){
+
+    currentMode = mode;
+    maxProgress = max;
+
+    progress = 0;
+
+    updateProgress();
+
+    document.querySelectorAll(".modeBtn")
+        .forEach(btn => btn.classList.remove("activeMode"));
+
+    button.classList.add("activeMode");
+}
+
+function updateProgress(){
+
+    const percent = (progress / maxProgress) * 100;
+
+    progressBar.style.width = percent + "%";
+
+    progressText.textContent =
+        progress + " / " + maxProgress;
+}
+
 function randomKey(){
     return keys[Math.floor(Math.random()*keys.length)];
 }
@@ -234,6 +347,15 @@ document.addEventListener("keydown",(e)=>{
     if(key === currentKey){
 
         streak++;
+
+        progress++;
+
+        updateProgress();
+
+        if(progress >= maxProgress){
+            progress = maxProgress;
+            updateProgress();
+        }
 
         streakText.textContent = streak;
 
@@ -289,9 +411,13 @@ restartBtn.addEventListener("click",()=>{
     resets = 2;
     canReset = false;
 
+    progress = 0;
+
     errorsText.textContent = errors;
     streakText.textContent = streak;
     resetsText.textContent = resets;
+
+    updateProgress();
 
     playing = true;
 
@@ -301,6 +427,7 @@ restartBtn.addEventListener("click",()=>{
 });
 
 setLanguage("pt");
+updateProgress();
 nextRound();
 </script>
 
