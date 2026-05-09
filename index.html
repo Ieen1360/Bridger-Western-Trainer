@@ -3,97 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QTE Trainer</title>
+<title>Bridger Western Trainer</title>
 
 <style>
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-        font-family:Arial, Helvetica, sans-serif;
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
 
-    body{
-        overflow:hidden;
-        background:#0f0f0f;
-        color:white;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-    }
+body{
+    overflow:hidden;
+    background:#0f0f0f;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
 
-    #game{
-        text-align:center;
-    }
+#game{
+    text-align:center;
+}
 
-    h1{
-        margin-bottom:20px;
-        font-size:42px;
-    }
+h1{
+    margin-bottom:20px;
+    font-size:42px;
+}
 
-    #circle{
-        width:180px;
-        height:180px;
-        border-radius:50%;
-        background:#1f1f1f;
-        border:6px solid #ffffff;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        font-size:80px;
-        font-weight:bold;
-        transition:0.15s;
-        margin:auto;
-    }
+#circle{
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:#1f1f1f;
+    border:6px solid #ffffff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:80px;
+    font-weight:bold;
+    transition:0.15s;
+    margin:auto;
+}
 
-    .correct{
-        background:#1aff75 !important;
-        transform:scale(1.1);
-    }
+.correct{
+    background:#1aff75 !important;
+    transform:scale(1.1);
+}
 
-    .wrong{
-        background:#ff2e2e !important;
-        transform:scale(0.95);
-    }
+.wrong{
+    background:#ff2e2e !important;
+    transform:scale(0.95);
+}
 
-    #info{
-        margin-top:25px;
-        font-size:24px;
-    }
+#info{
+    margin-top:25px;
+    font-size:24px;
+    line-height:1.8;
+}
 
-    #restart{
-        margin-top:25px;
-        padding:14px 30px;
-        border:none;
-        border-radius:12px;
-        font-size:22px;
-        cursor:pointer;
-        display:none;
-    }
+#restart{
+    margin-top:25px;
+    padding:14px 30px;
+    border:none;
+    border-radius:12px;
+    font-size:22px;
+    cursor:pointer;
+    display:none;
+}
 
-    .shake{
-        animation:shake 0.18s;
-    }
+.shake{
+    animation:shake 0.18s;
+}
 
-    @keyframes shake{
-        0%{transform:translate(0px);}
-        25%{transform:translate(10px);}
-        50%{transform:translate(-10px);}
-        75%{transform:translate(6px);}
-        100%{transform:translate(0px);}
-    }
+@keyframes shake{
+    0%{transform:translate(0px);}
+    25%{transform:translate(10px);}
+    50%{transform:translate(-10px);}
+    75%{transform:translate(6px);}
+    100%{transform:translate(0px);}
+}
 </style>
 </head>
 <body>
 
 <div id="game">
-    <h1>QTE TRAINER</h1>
+    <h1>BRIDGER WESTERN TRAINER</h1>
 
     <div id="circle">R</div>
 
     <div id="info">
-        Erros: <span id="errors">0</span>/2
+        Erros: <span id="errors">0</span>/2 <br>
+        Acertos: <span id="streak">0</span>/4 <br>
+        Resets restantes: <span id="resets">2</span>
     </div>
 
     <button id="restart">Reiniciar</button>
@@ -104,10 +107,16 @@ const keys = ["R","T","F","G"];
 
 const circle = document.getElementById("circle");
 const errorsText = document.getElementById("errors");
+const streakText = document.getElementById("streak");
+const resetsText = document.getElementById("resets");
 const restartBtn = document.getElementById("restart");
 
 let currentKey = "";
 let errors = 0;
+let streak = 0;
+let resets = 2;
+let canReset = false;
+
 let playing = true;
 let timer;
 
@@ -132,6 +141,8 @@ function nextRound(){
 function lose(){
     playing = false;
 
+    clearTimeout(timer);
+
     circle.classList.add("wrong");
 
     restartBtn.style.display = "inline-block";
@@ -152,10 +163,37 @@ document.addEventListener("keydown",(e)=>{
 
     if(key === currentKey){
 
+        streak++;
+
+        streakText.textContent = streak;
+
         circle.classList.remove("wrong");
         circle.classList.add("correct");
 
         winEffect();
+
+        // Só libera reset se já tiver errado antes
+        if(errors > 0){
+            canReset = true;
+        }
+
+        // Reset acontece SOMENTE se:
+        // tiver errado antes
+        // tiver 4 acertos
+        // ainda tiver resets
+        if(streak >= 4 && canReset && resets > 0){
+
+            errors = 0;
+            streak = 0;
+
+            resets--;
+
+            canReset = false;
+
+            errorsText.textContent = errors;
+            streakText.textContent = streak;
+            resetsText.textContent = resets;
+        }
 
         setTimeout(()=>{
             nextRound();
@@ -165,7 +203,10 @@ document.addEventListener("keydown",(e)=>{
 
         errors++;
 
+        streak = 0;
+
         errorsText.textContent = errors;
+        streakText.textContent = streak;
 
         circle.classList.remove("correct");
         circle.classList.add("wrong");
@@ -177,8 +218,15 @@ document.addEventListener("keydown",(e)=>{
 });
 
 restartBtn.addEventListener("click",()=>{
+
     errors = 0;
+    streak = 0;
+    resets = 2;
+    canReset = false;
+
     errorsText.textContent = errors;
+    streakText.textContent = streak;
+    resetsText.textContent = resets;
 
     playing = true;
 
