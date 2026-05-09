@@ -23,6 +23,24 @@ body{
     height:100vh;
 }
 
+/* Idiomas */
+#languageBox{
+    position:absolute;
+    top:15px;
+    left:15px;
+    display:flex;
+    gap:10px;
+}
+
+.langBtn{
+    padding:8px 14px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:bold;
+}
+
 #game{
     text-align:center;
 }
@@ -88,15 +106,22 @@ h1{
 </head>
 <body>
 
+<!-- Idiomas -->
+<div id="languageBox">
+    <button class="langBtn" onclick="setLanguage('pt')">PT</button>
+    <button class="langBtn" onclick="setLanguage('es')">ES</button>
+    <button class="langBtn" onclick="setLanguage('en')">EN</button>
+</div>
+
 <div id="game">
-    <h1>BRIDGER WESTERN TRAINER</h1>
+    <h1 id="title">BRIDGER WESTERN TRAINER</h1>
 
     <div id="circle">R</div>
 
     <div id="info">
-        Erros: <span id="errors">0</span>/2 <br>
-        Acertos: <span id="streak">0</span>/4 <br>
-        Resets restantes: <span id="resets">2</span>
+        <span id="errorsLabel">Erros</span>: <span id="errors">0</span>/2 <br>
+        <span id="streakLabel">Acertos</span>: <span id="streak">0</span>/4 <br>
+        <span id="resetsLabel">Resets restantes</span>: <span id="resets">2</span>
     </div>
 
     <button id="restart">Reiniciar</button>
@@ -119,6 +144,51 @@ let canReset = false;
 
 let playing = true;
 let timer;
+
+/* Traduções */
+const translations = {
+    pt: {
+        title: "BRIDGER WESTERN TRAINER",
+        errors: "Erros",
+        streak: "Acertos",
+        resets: "Resets restantes",
+        restart: "Reiniciar"
+    },
+
+    es: {
+        title: "BRIDGER WESTERN TRAINER",
+        errors: "Errores",
+        streak: "Aciertos",
+        resets: "Reinicios restantes",
+        restart: "Reiniciar"
+    },
+
+    en: {
+        title: "BRIDGER WESTERN TRAINER",
+        errors: "Errors",
+        streak: "Hits",
+        resets: "Remaining resets",
+        restart: "Restart"
+    }
+};
+
+function setLanguage(lang){
+
+    document.getElementById("title").textContent =
+        translations[lang].title;
+
+    document.getElementById("errorsLabel").textContent =
+        translations[lang].errors;
+
+    document.getElementById("streakLabel").textContent =
+        translations[lang].streak;
+
+    document.getElementById("resetsLabel").textContent =
+        translations[lang].resets;
+
+    restartBtn.textContent =
+        translations[lang].restart;
+}
 
 function randomKey(){
     return keys[Math.floor(Math.random()*keys.length)];
@@ -172,15 +242,10 @@ document.addEventListener("keydown",(e)=>{
 
         winEffect();
 
-        // Só libera reset se já tiver errado antes
         if(errors > 0){
             canReset = true;
         }
 
-        // Reset acontece SOMENTE se:
-        // tiver errado antes
-        // tiver 4 acertos
-        // ainda tiver resets
         if(streak >= 4 && canReset && resets > 0){
 
             errors = 0;
@@ -235,6 +300,7 @@ restartBtn.addEventListener("click",()=>{
     nextRound();
 });
 
+setLanguage("pt");
 nextRound();
 </script>
 
